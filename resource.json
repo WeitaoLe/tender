@@ -1,0 +1,9 @@
+{
+    "code": 200,
+    "message": "failed",
+    "data": [
+	   {"id":1,"sort_name":"中厚板","factory":"马钢","amount":"2500","materials":"111","delivery":"","specs":"2222","repertory":"333"},
+	   {"id":2,"sort_name":"中厚板","factory":"马钢","amount":"2500","materials":"111","delivery":"","specs":"2222","repertory":"333"},
+	   {"id":3,"sort_name":"中厚板","factory":"马钢","amount":"2500","materials":"111","delivery":"","specs":"2222","repertory":"333"}
+    ]
+}

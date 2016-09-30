@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>钢材招标</title>
+    <link rel="stylesheet" href="css/weui.css"/>
+    <link rel="stylesheet" href="css/iconfont.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <script type="text/javascript" src="lib/zepto.min.js"></script>
+    <script type="text/javascript" src="lib/vue.min.js"></script>
+    <script type="text/javascript" src="lib/vue-router.min.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+</head>
+<body ontouchstart>
+    <div class="container" id="app">
+        <router-view
+          class="view"
+          keep-alive
+          transition
+          transition-mode="out-in"></router-view>
+    </div>
+
+<!-- 招标首页组件模板 -->
+<template id="tpl_steeltender">
+  <div class="page_pd" v-for="v in items" :class="{'mg-t-10':index !=0}">
+            <div class="weui-panel">
+            <div class="weui-panel__hd fs17">报价中 <span class="endtime">截止：{{v.end_time}}</span></div>
+            <div class="weui-panel__bd">
+                <div class="weui-media-box weui-media-box_small-appmsg">
+                    <div class="weui-cells">
+                        <a class="weui-cell weui-cell_access" href="javascript:;">
+                            <div class="weui-cell__bd weui-cell_primary">
+                                <p class="cgtit"><span class="gray_tit">采购:</span>{{v.sort_name_list}}</p>
+                                <p><span class="gray_tit">交货地址:</span>{{v.delivery}}</p>
+                                <p><span class="gray_tit">采购量:</span>{{v.amount_sum}}吨</p>
+                            </div>
+                            <span v-link="{path: '/yb',query:{id:v.id}}" class="weui-btn weui-btn_mini weui-btn_blue">应 标</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+  </div>
+</template>
+
+<!-- 弹出层dialog组件模板 -->
+<template type="text/html" id="tpl_dialog">
+<div id="dialog" style="display: none;">
+    <div class="weui-mask"></div>
+    <div class="weui-dialog">
+        <div class="weui-dialog__bd"></div>
+        <div class="weui-dialog__ft">
+            <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" @click="hidedialog">知道了</a>
+        </div>
+    </div>
+</div>
+</template>
+
+<!-- 应标页面组件模板 -->
+<template type="text/html" id="tpl_yb">
+<!-- 注册弹出层组件 -->
+<dialog></dialog>
+<form id="form">
+  <div class="topbar"><i class="icon jsb cfb814b">&#xe669;</i>您的报价</div>
+  <div class="sh_address"><span class="gray_tit">交货地址：</span>{{delivery}}</div>
+  <div class="page_pd">
+      <div class="weui-panel no_border_top" v-for="yb in items" :class="{'no_mg_top':index !=0}">
+      <div class="weui-panel__bd">
+          <div class="weui-media-box weui-media-box_small-appmsg">
+              <div class="weui-cells">
+                  <a class="weui-cell weui-cell_access" href="javascript:;">
+                          <div class="weui-cell__bd weui-cell_primary">
+                          <div class="flexbox">
+                            <div>{{yb.sort_name}}</div>
+                            <div class="gray_tit">{{yb.factory}}</div>
+                            <div>采购量：<span class="num">{{yb.amount}}</span>吨</div>
+                          </div>
+                          <div class="flexbox">
+                            <div>
+                              <span class="gray_tit">规格:</span>{{yb.specs}}
+                            </div>
+                             <div>
+                                <span class="gray_tit">材质:</span>{{yb.materials}}
+                             </div>
+                          </div>
+                          <div><span class="gray_tit">应标价格:</span><input type="text" id="price{{yb.id}}" placeholder="请输入应标价格" name="price{{yb.id}}" class="price_sm" value="">元/件</div>
+                      </div>
+                  </a>
+              </div>
+          </div>
+      </div>
+    </div>
+    <!-- 注册报名组件 -->
+    <baoming></baoming>
+    <div class="height40"></div>
+    <div class="footerbtn"><button type="button" class="weui-btn weui-btn_blue_lang" @click="submitData">提交应标</button></div>
+  </div>
+</form>
+</template>
+
+<!-- 报名窗口组件模板-->
+<template type="text/html" id="tpl_baoming">
+  <div class="topbar"><i class="icon iconfont cfb814b">&#xe609;</i>请留下您的信息</div>
+    <div class="weui-cells weui-cells_form no_mg_top">
+      <div class="weui-cell">
+          <div class="weui-cell__hd"><label class="weui-label width80">公司名称</label></div>
+          <div class="weui-cell__bd">
+              <input class="weui-input" name="buess" id="buess" v-model="buess" @click="inputFocus" type="text"  placeholder="请输入公司名称"/>
+          </div>
+      </div>
+      <div class="weui-cell">
+          <div class="weui-cell__hd"><label class="weui-label width80">姓名</label></div>
+          <div class="weui-cell__bd">
+              <input class="weui-input" name="username" id="username"  v-model="username" type="text"  placeholder="请输入姓名"/>
+          </div>
+      </div>
+    </div>
+    <div class="topbar"><i class="icon iconfont cfb814b">&#xe626;</i>手机验证，便于及时联系</div>
+    <div class="weui-cells weui-cells_form no_mg_top">
+      <div class="weui-cell weui-cell_vcode">
+        <div class="weui-cell__hd">
+            <label class="weui-label width80">手机号</label>
+        </div>
+        <div class="weui-cell__bd">
+            <input class="weui-input" name="userphone" id="userphone" v-model="userphone"  type="tel" placeholder="请输入手机号">
+        </div>
+        <div class="weui-cell__ft">
+            <a href="javascript:;" class="weui-vcode-btn" :class="{'msg':isSend}" @click="getCode($event)">获取验证码</a>
+        </div>
+      </div>
+      <div class="weui-cell">
+          <div class="weui-cell__hd"><label class="weui-label width80">验证码</label></div>
+          <div class="weui-cell__bd">
+              <input class="weui-input" id="markcode" v-model="markcode" type="number"  placeholder="请输入验证码"/>
+          </div>
+      </div>
+    </div>
+</template>
+
+<!-- 独立报名页组件模板 -->
+<template type="text/html" id="tpl_baomingpage">
+<form id="form2">
+  <baoming></baoming>
+  <dialog></dialog>
+  <input type="hidden" id="resourceid" name="resourceid" v-model="resourceid">
+  <div class="height10"></div>
+  <div class="pd-l-r-15">
+    <div class="page__bd page__bd_spacing">
+      <a href="javascript:;" :class="['weui-btn', isDisable ? 'weui-btn_disabled weui-btn_default' : 'weui-btn_primary']" @click="submitData">提交订单</a>
+    </div>
+  </div>
+</form>
+</template>
+
+<!-- 资源首页组件模板 -->
+<template type="text/html" id="tpl_resource">
+  <dialog></dialog>
+  <div class="page__bd">
+        <div class="weui-cells weui-cells_checkbox no_mg_top">
+            <label class="weui-cell weui-check__label " for="s{{v.id}}" v-for="v in items">
+                <div class="weui-cell__bd">
+                    <div class="flexbox">
+                        <p>{{v.sort_name}}</p>
+                        <p><span class="gray_tit">{{v.factory}}</span></p>
+                        <p><span class="gray_tit">￥<span>{{v.amount}}</span>/吨</span></p>
+                    </div>
+                     <div class="flexbox">
+                        <p class="gray_tit">{{v.materials}}</p>
+                        <p class="gray_tit">{{v.delivery}}</p>
+                    </div>
+                     <div class="flexbox">
+                        <p class="gray_tit">{{v.specs}}</p>
+                        <p class="gray_tit">库存：<span class="num">{{v.repertory}}</span>/吨</p>
+                    </div>
+                </div>
+                <div class="weui-cell__hd">
+                    <input type="checkbox" value="{{v.id}}" class="weui-check" v-model="resource" id="s{{v.id}}">
+                    <i class="weui-icon-checked"></i>
+                </div>
+            </label>
+        </div>
+    </div>
+    <div class="footerbtn flexbox resource_footer">
+      <div class="pd-l-15">已选择<span class="num">{{countSum}}</span>条资源</div>
+      <div><a href="javaScript:;" @click="emptyCheckbox">清空选择</a></div>
+      <div><button type="" class="weui-btn weui-btn_blue_lang" @click="resource_submit">下单</button></div>
+    </div>
+</template>
+
+</body>
+</html>
